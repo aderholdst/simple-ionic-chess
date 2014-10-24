@@ -38,25 +38,25 @@ angular.module('simple-chess.controllers', [])
 
         function joinGame(game, profile) {
             game.playerTwo = {
-                    'userId': profile.user_id,
-                    'nickname': profile.nickname
+                'userId': profile.user_id,
+                'nickname': profile.nickname
             };
             console.log($scope.games);
             $scope.games.$save(game);
         };
 
-        $scope.canJoin = function(game, profile){
+        $scope.canJoin = function (game, profile) {
             var userId = profile.user_id;
             return !game.playerTwo && game.playerOne && game.playerOne.userId != userId;
         };
 
-        $scope.isMember = function(game, profile){
+        $scope.isMember = function (game, profile) {
             var userId = profile.user_id;
             return game.playerOne.userId == userId || (game.playerTwo && game.playerTwo.userId == userId);
         };
 
-        $scope.enterGame = function(game, profile){
-            if($scope.canJoin(game, profile)){
+        $scope.enterGame = function (game, profile) {
+            if ($scope.canJoin(game, profile)) {
                 joinGame(game, profile);
             }
             $state.go('app.game', {gameId: game.$id});
@@ -73,17 +73,19 @@ angular.module('simple-chess.controllers', [])
         var gameSync = sync.$asObject();
         gameSync.$bindTo($scope, "game");
 
-        scope.$watch('game.position', function(newValue, oldValue) {
+        // TODO: write a directive :))!!!!
+        scope.$watch('game.position', function (newValue, oldValue) {
             console.log('game changed');
-            if(newValue) {
+            if (newValue) {
                 chess.load(newValue);
                 board.position(newValue);
             }
         });
 
+
         var chess = new Chess();
         var board;
-        gameSync.$loaded().then(function() {
+        gameSync.$loaded().then(function () {
             chess.reset();
             updateGameInfo('Next player is white.');
             board = new Chessboard('board', {
@@ -135,12 +137,13 @@ angular.module('simple-chess.controllers', [])
             return chess.fen();
         }
 
-        function updateXGameInfo(){
+        function updateXGameInfo() {
             var status;
             var nextPlayer = 'white';
             if (chess.turn() === 'b') {
                 nextPlayer = 'black';
-            };
+            }
+            ;
             if (chess.in_checkmate() === true) {
                 status = 'CHECKMATE! Player ' + nextPlayer + ' lost.';
             } else if (chess.in_draw() === true) {
@@ -186,3 +189,7 @@ angular.module('simple-chess.controllers', [])
             console.log("There was an error logging in", error);
         });
     })
+
+    .controller('ChatCtrl', function () {
+
+    });
