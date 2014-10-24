@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('simple-chess', ['ionic', 'simple-chess.controllers', 'auth0', 'doowb.angular-pusher'])
+angular.module('simple-chess', ['ionic', 'simple-chess.controllers', 'simple-chess.services', 'auth0', 'firebase'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -20,7 +20,7 @@ angular.module('simple-chess', ['ionic', 'simple-chess.controllers', 'auth0', 'd
   });
 })
 
-.config(function($stateProvider, $urlRouterProvider, $httpProvider, authProvider, PusherServiceProvider) {
+.config(function($stateProvider, $urlRouterProvider, $httpProvider, authProvider) {
 
       authProvider.init({
         domain: 'aderholdst.auth0.com',
@@ -29,15 +29,9 @@ angular.module('simple-chess', ['ionic', 'simple-chess.controllers', 'auth0', 'd
         loginState: 'login'
       });
 
-      function(PusherServiceProvider) {
-          PusherServiceProvider
-              .setToken('fc4c91573150fa8ec298')
-              .setOptions({});
-      }
-
       $httpProvider.interceptors.push('authInterceptor');
-  $stateProvider
 
+      $stateProvider
     // This is the state where you'll show the login
       .state('login', {
         url: '/login',
@@ -72,26 +66,26 @@ angular.module('simple-chess', ['ionic', 'simple-chess.controllers', 'auth0', 'd
         }
       }
     })
-    .state('app.playlists', {
-      url: "/playlists",
+    .state('app.games', {
+      url: "/games",
       views: {
         'menuContent' :{
-          templateUrl: "templates/playlists.html",
-          controller: 'PlaylistsCtrl'
+          templateUrl: "templates/games.html",
+          controller: 'GamesCtrl'
         }
       }
     })
 
     .state('app.single', {
-      url: "/playlists/:playlistId",
+      url: "/games/:playlistId",
       views: {
         'menuContent' :{
-          templateUrl: "templates/playlist.html",
+          templateUrl: "templates/game.html",
           controller: 'PlaylistCtrl'
         }
       }
     });
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/playlists');
+  $urlRouterProvider.otherwise('/app/games');
 });
 
