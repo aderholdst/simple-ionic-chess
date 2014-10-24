@@ -5,7 +5,6 @@
   <ion-content class="has-header">
     <div class="card" ng-repeat="game in games | orderBy : '-openedOn'" ng-click="enterGame(game, auth.profile)">
       <div class="item item-text-wrap">
-        {{ game | json }}
         {{game.playerOne.nickname}} {{game.playerTwo ? 'VS ' + game.playerTwo.nickname: ' waiting for challenge...'}}
       </div>
       <div class="item item-divider">

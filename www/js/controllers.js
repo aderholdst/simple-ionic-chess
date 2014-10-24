@@ -68,16 +68,26 @@ angular.module('simple-chess.controllers', [])
 
         var gameId = $stateParams.gameId;
         var ref = new Firebase("https://intense-torch-3062.firebaseio.com/games/" + gameId);
-
+        var scope = $scope;
         var sync = $firebase(ref);
-        $scope.game = sync.$asObject();
+        var gameSync = sync.$asObject();
+        gameSync.$bindTo($scope, "game");
+
+        scope.$watch('game.position', function(newValue, oldValue) {
+            console.log('game changed');
+            if(newValue) {
+                chess.load(newValue);
+                board.position(newValue);
+            }
+        });
 
         var chess = new Chess();
-        $scope.game.$loaded().then(function() {
+        var board;
+        gameSync.$loaded().then(function() {
             chess.reset();
             updateGameInfo('Next player is white.');
-            var board = new Chessboard('board', {
-                position: $scope.game.position,
+            board = new Chessboard('board', {
+                position: gameSync.position,
                 eventHandlers: {
                     onPieceSelected: pieceSelected,
                     onMove: pieceMove
@@ -91,10 +101,9 @@ angular.module('simple-chess.controllers', [])
             $('#info-pgn').html(chess.pgn());
         }
 
-        function pieceMove(move) {
+        function pieceMove(move, $scope) {
 
             var nextPlayer,
-                status,
                 chessMove = chess.move({
                     from: move.from,
                     to: move.to,
@@ -121,7 +130,29 @@ angular.module('simple-chess.controllers', [])
                 }
                 updateGameInfo(status);
             }
+            gameSync.position = chess.fen();
+            gameSync.$save();
             return chess.fen();
+        }
+
+        function updateXGameInfo(){
+            var status;
+            var nextPlayer = 'white';
+            if (chess.turn() === 'b') {
+                nextPlayer = 'black';
+            };
+            if (chess.in_checkmate() === true) {
+                status = 'CHECKMATE! Player ' + nextPlayer + ' lost.';
+            } else if (chess.in_draw() === true) {
+                status = 'DRAW!';
+            } else {
+                status = 'Next player is ' + nextPlayer + '.';
+
+                if (chess.in_check() === true) {
+                    status = 'CHECK! ' + status;
+                }
+            }
+            updateGameInfo(status);
         }
 
         function pieceSelected(notationSquare) {
