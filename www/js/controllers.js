@@ -12,7 +12,7 @@ angular.module('simple-chess.controllers', [])
         };
     })
 
-    .controller('GamesCtrl', function ($scope, auth, $ionicViewService, $firebase) {
+    .controller('GamesCtrl', function ($scope, auth, $ionicViewService, $state, $firebase) {
 
         $ionicViewService.clearHistory();
 
@@ -26,6 +26,7 @@ angular.module('simple-chess.controllers', [])
 
         $scope.startGame = function () {
             var newGame = {
+                'position': ChessUtils.FEN.startId,
                 'playerOne': {
                     'userId': auth.profile.user_id,
                     'nickname': auth.profile.nickname
@@ -58,30 +59,31 @@ angular.module('simple-chess.controllers', [])
             if($scope.canJoin(game, profile)){
                 joinGame(game, profile);
             }
+            $state.go('app.game', {gameId: game.$id});
         };
 
     })
 
-    .controller('PlaylistCtrl', function ($scope, $stateParams) {
+    .controller('GameCtrl', function ($scope, $stateParams, $firebase) {
+
+        var gameId = $stateParams.gameId;
+        var ref = new Firebase("https://intense-torch-3062.firebaseio.com/games/" + gameId);
+
+        var sync = $firebase(ref);
+        $scope.game = sync.$asObject();
 
         var chess = new Chess();
-
-        var board = new Chessboard('board', {
-            position: ChessUtils.FEN.startId,
-            eventHandlers: {
-                onPieceSelected: pieceSelected,
-                onMove: pieceMove
-            }
-        });
-
-        resetGame();
-
-        function resetGame() {
-            board.setPosition(ChessUtils.FEN.startId);
+        $scope.game.$loaded().then(function() {
             chess.reset();
-
             updateGameInfo('Next player is white.');
-        }
+            var board = new Chessboard('board', {
+                position: $scope.game.position,
+                eventHandlers: {
+                    onPieceSelected: pieceSelected,
+                    onMove: pieceMove
+                }
+            });
+        });
 
         function updateGameInfo(status) {
             $('#info-status').html(status);
@@ -117,10 +119,8 @@ angular.module('simple-chess.controllers', [])
                         status = 'CHECK! ' + status;
                     }
                 }
-
                 updateGameInfo(status);
             }
-
             return chess.fen();
         }
 

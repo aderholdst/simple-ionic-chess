@@ -76,12 +76,12 @@ angular.module('simple-chess', ['ionic', 'simple-chess.controllers', 'simple-che
       }
     })
 
-    .state('app.single', {
-      url: "/games/:playlistId",
+    .state('app.game', {
+      url: "/games/:gameId",
       views: {
         'menuContent' :{
           templateUrl: "templates/game.html",
-          controller: 'PlaylistCtrl'
+          controller: 'GameCtrl'
         }
       }
     });
